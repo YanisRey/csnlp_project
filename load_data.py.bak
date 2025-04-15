@@ -1,0 +1,102 @@
+from datasets import load_dataset
+from transformers import MBart50Tokenizer, AutoModelForSeq2SeqLM
+import random
+import string
+import torch
+import nltk
+from nltk.corpus import cmudict
+
+# Ensure NLTK CMU Pronouncing Dictionary is downloaded
+print("Downloading NLTK CMU Pronouncing Dictionary (if not already downloaded)...")
+nltk.download('cmudict', quiet=True)  # Use quiet=True to suppress download messages
+pronouncing_dict = cmudict.dict()
+print("NLTK CMU Pronouncing Dictionary is ready!")
+
+# Load WikiText dataset
+print("Loading WikiText dataset...")
+dataset = load_dataset("wikitext", "wikitext-103-v1")
+print("WikiText dataset loaded successfully!")
+
+# Select a subset of 10,000 examples
+subset_size = 10000
+print(f"Selecting a subset of {subset_size} examples...")
+dataset["train"] = dataset["train"].select(range(subset_size))
+print(f"Subset of {subset_size} examples selected!")
+
+# Parameters for introducing typos
+TYPO_PROB = 1 / 100
+ALPHABET = string.ascii_letters
+
+# Function to introduce typos into the text
+def introduce_typos(text, typo_prob=TYPO_PROB):
+    text_with_typos = []
+    for char in text:
+        if char in ALPHABET and random.random() < typo_prob:
+            text_with_typos.append(random.choice(ALPHABET))  # Random typo
+        else:
+            text_with_typos.append(char)  # No typo
+    return ''.join(text_with_typos)
+
+# Load the MBart50 model and tokenizer
+print("Loading MBart50 model and tokenizer...")
+ensemble_model = AutoModelForSeq2SeqLM.from_pretrained("facebook/mbart-large-50")
+ensemble_tokenizer = MBart50Tokenizer.from_pretrained("facebook/mbart-large-50")
+print("MBart50 model and tokenizer loaded successfully!")
+
+# Check if GPU is available and move model to GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+ensemble_model.to(device)
+print("Model moved to the appropriate device!")
+
+# Function to apply the Transformer model to generate phonetic text
+def apply_transformer_ensemble(text):
+    inputs = ensemble_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inputs = {key: value.to(device) for key, value in inputs.items()}  # Move inputs to GPU
+    outputs = ensemble_model.generate(**inputs)
+    return ensemble_tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+# Dictionary-based phonetic conversion using CMU Pronouncing Dictionary
+def dictionary_phonetics(word):
+    phonetics = pronouncing_dict.get(word.lower())
+    if phonetics:
+        return ' '.join(phonetics[0])
+    return None
+
+# Function to get phonetics for each word
+def get_phonetics(text):
+    words = text.split()
+    phonetic_words = [dictionary_phonetics(word) or apply_transformer_ensemble(word) for word in words]
+    return ' '.join(phonetic_words)
+
+# Function to add phonetic text to each example in the dataset
+def add_phonetics(batch):
+    print(f"Processing batch of size {len(batch['text'])}...")
+    phonetic_texts = [get_phonetics(text) for text in batch["text"]]
+    print(f"Finished processing batch of size {len(batch['text'])}!")
+    return {"phonetic_text": phonetic_texts}
+
+if __name__ == '__main__':
+    # Apply typos to the entire dataset
+    print("Introducing typos into the dataset...")
+    dataset = dataset.map(lambda example: {"text": introduce_typos(example["text"])})
+    print("Typos introduced successfully!")
+
+    # Apply phonetic transformation with batching
+    batch_size = 8  # You can adjust this based on your GPU memory
+    print(f"Applying phonetic transformation with batch size {batch_size}...")
+    dataset = dataset.map(add_phonetics, batched=True, batch_size=batch_size)
+    print("Phonetic transformation completed!")
+
+    # Save the phonetic dataset to disk
+    print("Saving the phonetic dataset to disk...")
+    dataset.save_to_disk("./phonetic_wikitext")
+    print("Phonetic dataset saved to './phonetic_wikitext'!")
+
+    # Sample 150 words with typos and their phonetics
+    sample_text = ' '.join(dataset['train'][0]['text'].split()[:150])
+    sample_phonetics = ' '.join(dataset['train'][0]['phonetic_text'].split()[:150])
+
+    # Display the original text with typos and its phonetic representation
+    print("\nOriginal Text with Typos:\n", sample_text)
+    print("\nPhonetic Representation:\n", sample_phonetics)
