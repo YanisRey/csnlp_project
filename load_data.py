@@ -19,7 +19,6 @@ with open("cleaned_misspellings.json", "r") as f:
     misspellings_dict = json.load(f)
 print("Misspellings dictionary loaded successfully!")
 
-
 # Update the misspelling for "a"
 misspellings_dict["a"] = ["euh"]
 
@@ -27,58 +26,48 @@ misspellings_dict["a"] = ["euh"]
 with open("cleaned_misspellings.json", "w") as f:
     json.dump(misspellings_dict, f, indent=2)
 
-
-
 # Load WikiText dataset
 print("Loading WikiText dataset...")
 dataset = load_dataset("wikitext", "wikitext-103-v1")
 print("WikiText dataset loaded successfully!")
 
-
 # Filter WikiText for real sentences
 print("Filtering WikiText for natural language lines...")
 
-
-
-
-
-
-
-
-
 def is_clean_text(line):
-        line = line.strip()
-        if len(line.split()) < 3:
-            return False
-        if line.startswith("="):
-            return False
-        if line.isupper():
-            return False
-        if re.match(r'^[\W_]+$', line):  # only punctuation
-            return False
-        return True
+    line = line.strip()
+    if len(line.split()) < 3:
+        return False
+    if line.startswith("="):
+        return False
+    if line.isupper():
+        return False
+    if re.match(r'^[\W_]+$', line):  # only punctuation
+        return False
+    return True
 
 clean_examples = [ex for ex in dataset["train"] if is_clean_text(ex["text"])]
 
 print("Using all clean examples from WikiText...")
 dataset["train"] = Dataset.from_list(clean_examples)
 
+# Rename original column for clarity
+dataset = dataset.rename_column("text", "original_text")
 
 # Apply misspellings with 0.5 probability
-def apply_misspellings(text, prob=0.5):
-    words = text.split()
+def apply_misspellings(example, prob=0.5):
+    words = example["original_text"].split()
     modified = []
     for word in words:
         lower_word = word.lower()
         if lower_word in misspellings_dict and random.random() < prob:
             misspelled = random.choice(misspellings_dict[lower_word])
-            # Preserve original capitalization
             if word[0].isupper():
                 misspelled = misspelled.capitalize()
             modified.append(misspelled)
         else:
             modified.append(word)
-    return ' '.join(modified)
+    return {"misspelled_text": ' '.join(modified)}
 
 # Initialize g2p_en model
 print("Loading g2p_en transformer model...")
@@ -108,15 +97,12 @@ def get_phonetics(text):
 
 # Apply phonetic conversion to batches
 def add_phonetics(batch):
-    #print(f"Processing batch of size {len(batch['text'])}...")
-    phonetic_texts = [get_phonetics(text) for text in batch["text"]]
-    #print(f"Finished processing batch of size {len(batch['text'])}!")
+    phonetic_texts = [get_phonetics(text) for text in batch["misspelled_text"]]
     return {"phonetic_text": phonetic_texts}
 
 if __name__ == '__main__':
-    
     print("Injecting misspellings into the dataset...")
-    dataset = dataset.map(lambda example: {"text": apply_misspellings(example["text"])})
+    dataset = dataset.map(lambda ex: apply_misspellings(ex))
     print("Misspellings injected successfully!")
 
     batch_size = 8
@@ -124,20 +110,16 @@ if __name__ == '__main__':
     dataset = dataset.map(add_phonetics, batched=True, batch_size=batch_size)
     print("Phonetic transformation completed!")
 
-
     print("Saving the phonetic dataset to disk...")
     dataset.save_to_disk("./phonetic_wikitext_with_misspellings")
     print("Phonetic dataset saved to './phonetic_wikitext_with_misspellings'!")
 
-        
-    
     print(f"Found {len(clean_examples)} clean examples.")
 
-
-    sample_text = ' '.join(dataset['train'][0]['text'].split()[:150])
+    sample_original = ' '.join(dataset['train'][0]['original_text'].split()[:150])
+    sample_misspelled = ' '.join(dataset['train'][0]['misspelled_text'].split()[:150])
     sample_phonetics = ' '.join(dataset['train'][0]['phonetic_text'].split()[:150])
 
-    print("Sample clean text before applying misspellings:")
-    print(clean_subset[0]["text"])
-    print("\nOriginal Text with Misspellings:\n", sample_text)
+    print("\nOriginal Text:\n", sample_original)
+    print("\nText with Misspellings:\n", sample_misspelled)
     print("\nPhonetic Representation:\n", sample_phonetics)

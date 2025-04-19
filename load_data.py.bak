@@ -108,9 +108,9 @@ def get_phonetics(text):
 
 # Apply phonetic conversion to batches
 def add_phonetics(batch):
-    print(f"Processing batch of size {len(batch['text'])}...")
+    #print(f"Processing batch of size {len(batch['text'])}...")
     phonetic_texts = [get_phonetics(text) for text in batch["text"]]
-    print(f"Finished processing batch of size {len(batch['text'])}!")
+    #print(f"Finished processing batch of size {len(batch['text'])}!")
     return {"phonetic_text": phonetic_texts}
 
 if __name__ == '__main__':

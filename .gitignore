@@ -1,4 +1,6 @@
 "venv/" 
 "*.dll" 
 "*.lib" 
-"venv/" 
+venv/
+*.pyc
+__pycache__/
