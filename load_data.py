@@ -1,10 +1,11 @@
-from datasets import load_dataset 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import json
 import random
-import string
-import torch
+from datasets import load_dataset
+from g2p_en import G2p
 import nltk
 from nltk.corpus import cmudict
+from datasets import Dataset
+import re
 
 # Ensure NLTK CMU Pronouncing Dictionary is downloaded
 print("Downloading NLTK CMU Pronouncing Dictionary (if not already downloaded)...")
@@ -12,48 +13,77 @@ nltk.download('cmudict', quiet=True)
 pronouncing_dict = cmudict.dict()
 print("NLTK CMU Pronouncing Dictionary is ready!")
 
+# Load misspellings dictionary
+print("Loading misspellings dictionary from misspellings.json...")
+with open("cleaned_misspellings.json", "r") as f:
+    misspellings_dict = json.load(f)
+print("Misspellings dictionary loaded successfully!")
+
+
+# Update the misspelling for "a"
+misspellings_dict["a"] = ["euh"]
+
+# Save the updated dictionary
+with open("cleaned_misspellings.json", "w") as f:
+    json.dump(misspellings_dict, f, indent=2)
+
+
+
 # Load WikiText dataset
 print("Loading WikiText dataset...")
 dataset = load_dataset("wikitext", "wikitext-103-v1")
 print("WikiText dataset loaded successfully!")
 
-# Select a subset of 10,000 examples
-subset_size = 10000
-print(f"Selecting a subset of {subset_size} examples...")
-dataset["train"] = dataset["train"].select(range(subset_size))
-print(f"Subset of {subset_size} examples selected!")
 
-# Parameters for introducing typos
-TYPO_PROB = 1 / 100
-ALPHABET = string.ascii_letters
+# Filter WikiText for real sentences
+print("Filtering WikiText for natural language lines...")
 
-def introduce_typos(text, typo_prob=TYPO_PROB):
-    text_with_typos = []
-    for char in text:
-        if char in ALPHABET and random.random() < typo_prob:
-            text_with_typos.append(random.choice(ALPHABET))
+
+
+
+
+
+
+
+
+def is_clean_text(line):
+        line = line.strip()
+        if len(line.split()) < 3:
+            return False
+        if line.startswith("="):
+            return False
+        if line.isupper():
+            return False
+        if re.match(r'^[\W_]+$', line):  # only punctuation
+            return False
+        return True
+
+clean_examples = [ex for ex in dataset["train"] if is_clean_text(ex["text"])]
+
+print("Using all clean examples from WikiText...")
+dataset["train"] = Dataset.from_list(clean_examples)
+
+
+# Apply misspellings with 0.5 probability
+def apply_misspellings(text, prob=0.5):
+    words = text.split()
+    modified = []
+    for word in words:
+        lower_word = word.lower()
+        if lower_word in misspellings_dict and random.random() < prob:
+            misspelled = random.choice(misspellings_dict[lower_word])
+            # Preserve original capitalization
+            if word[0].isupper():
+                misspelled = misspelled.capitalize()
+            modified.append(misspelled)
         else:
-            text_with_typos.append(char)
-    return ''.join(text_with_typos)
+            modified.append(word)
+    return ' '.join(modified)
 
-# Load the ByT5 model and tokenizer
-print("Loading ByT5 model and tokenizer...")
-ensemble_model = AutoModelForSeq2SeqLM.from_pretrained("google/byt5-base")
-ensemble_tokenizer = AutoTokenizer.from_pretrained("google/byt5-base")
-print("ByT5 model and tokenizer loaded successfully!")
-
-# Check if GPU is available and move model to GPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-ensemble_model.to(device)
-print("Model moved to the appropriate device!")
-
-# Function to apply the Transformer model to generate phonetic text
-def apply_transformer_ensemble(text):
-    inputs = ensemble_tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-    inputs = {key: value.to(device) for key, value in inputs.items()}
-    outputs = ensemble_model.generate(**inputs)
-    return ensemble_tokenizer.decode(outputs[0], skip_special_tokens=True)
+# Initialize g2p_en model
+print("Loading g2p_en transformer model...")
+g2p_model = G2p()
+print("g2p_en transformer model loaded successfully!")
 
 # Dictionary-based phonetic conversion using CMU Pronouncing Dictionary
 def dictionary_phonetics(word):
@@ -62,33 +92,52 @@ def dictionary_phonetics(word):
         return ' '.join(phonetics[0])
     return None
 
+# Use CMU dictionary first, fallback to g2p_en transformer if needed
 def get_phonetics(text):
     words = text.split()
-    phonetic_words = [dictionary_phonetics(word) or apply_transformer_ensemble(word) for word in words]
+    phonetic_words = []
+    for word in words:
+        phonetic = dictionary_phonetics(word)
+        if phonetic:
+            phonetic_words.append(phonetic)
+        else:
+            g2p_result = g2p_model(word)
+            cleaned = [p for p in g2p_result if p.isalpha() or p in ["'", ".", "ˈ", "ˌ"]]
+            phonetic_words.append(' '.join(cleaned))
     return ' '.join(phonetic_words)
 
+# Apply phonetic conversion to batches
 def add_phonetics(batch):
-    print(f"Processing batch of size {len(batch['text'])}...")
+    #print(f"Processing batch of size {len(batch['text'])}...")
     phonetic_texts = [get_phonetics(text) for text in batch["text"]]
-    print(f"Finished processing batch of size {len(batch['text'])}!")
+    #print(f"Finished processing batch of size {len(batch['text'])}!")
     return {"phonetic_text": phonetic_texts}
 
 if __name__ == '__main__':
-    print("Introducing typos into the dataset...")
-    dataset = dataset.map(lambda example: {"text": introduce_typos(example["text"])})
-    print("Typos introduced successfully!")
+    
+    print("Injecting misspellings into the dataset...")
+    dataset = dataset.map(lambda example: {"text": apply_misspellings(example["text"])})
+    print("Misspellings injected successfully!")
 
     batch_size = 8
     print(f"Applying phonetic transformation with batch size {batch_size}...")
     dataset = dataset.map(add_phonetics, batched=True, batch_size=batch_size)
     print("Phonetic transformation completed!")
 
+
     print("Saving the phonetic dataset to disk...")
-    dataset.save_to_disk("./phonetic_wikitext")
-    print("Phonetic dataset saved to './phonetic_wikitext'!")
+    dataset.save_to_disk("./phonetic_wikitext_with_misspellings")
+    print("Phonetic dataset saved to './phonetic_wikitext_with_misspellings'!")
+
+        
+    
+    print(f"Found {len(clean_examples)} clean examples.")
+
 
     sample_text = ' '.join(dataset['train'][0]['text'].split()[:150])
     sample_phonetics = ' '.join(dataset['train'][0]['phonetic_text'].split()[:150])
 
-    print("\nOriginal Text with Typos:\n", sample_text)
+    print("Sample clean text before applying misspellings:")
+    print(clean_subset[0]["text"])
+    print("\nOriginal Text with Misspellings:\n", sample_text)
     print("\nPhonetic Representation:\n", sample_phonetics)
