@@ -1,0 +1,19 @@
+# Ignore virtual environments
+venv/
+.venv/
+
+# Ignore compiled files
+*.dll
+*.lib
+
+# Ignore processed datasets and embedding outputs
+*.npy
+*.model
+*.kv
+*.arrow
+phonetic_wikitext_with_misspellings/
+phonetic_wikitext_with_misspellings_small/
+trained_embeddings/
+
+# Ignore system files
+.DS_Store

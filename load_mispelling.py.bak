@@ -1,0 +1,39 @@
+import requests
+from bs4 import BeautifulSoup
+
+# URL of the Wikipedia page containing common misspellings
+url = "https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings"
+
+# Fetch the page content
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+# Initialize an empty dictionary to store correct words and their misspellings
+misspellings_dict = {}
+
+# Find the table containing the misspellings
+# The table has a class "wikitable" on the Wikipedia page
+table = soup.find('table', {'class': 'wikitable'})
+
+# Iterate through each row in the table
+for row in table.find_all('tr'):
+    # Extract the columns in the row
+    columns = row.find_all('td')
+    
+    # Ensure there are at least two columns (correct word and misspellings)
+    if len(columns) >= 2:
+        correct_word = columns[0].text.strip().lower()  # Correct word (first column)
+        misspellings = columns[1].text.strip().lower()  # Misspellings (second column)
+        
+        # Split the misspellings into a list (they are separated by commas)
+        misspellings_list = [m.strip() for m in misspellings.split(',')]
+        
+        # Add the correct word and its misspellings to the dictionary
+        misspellings_dict[correct_word] = misspellings_list
+
+# Print the dictionary
+print(misspellings_dict)
+
+# Example output for a few entries
+for correct_word, misspellings in list(misspellings_dict.items())[:5]:
+    print(f"{correct_word}: {misspellings}")

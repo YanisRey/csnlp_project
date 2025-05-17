@@ -1,0 +1,73 @@
+import os
+import shutil
+import logging
+from datasets import load_from_disk
+from gensim.models import Word2Vec, FastText
+
+# Configure logging
+logging.basicConfig(format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO)
+
+# Paths
+dataset_path = "./phonetic_wikitext_with_misspellings"
+embedding_dir = "./trained_embeddings"
+
+# Clean up old embedding directory if exists
+if os.path.exists(embedding_dir):
+    print("Cleaning old embeddings directory...")
+    shutil.rmtree(embedding_dir)
+os.makedirs(embedding_dir, exist_ok=True)
+
+# Load dataset
+print("Loading dataset from disk...")
+dataset = load_from_disk(dataset_path)
+train_dataset = dataset["train"]
+
+# Prepare corpora
+print("Preparing training corpora...")
+text_corpus = [text.split() for text in train_dataset["original_text"]]
+phonetic_corpus = [phonetic.split() for phonetic in train_dataset["phonetic_text"]]
+
+# 1. GloVe-like model (Word2Vec CBOW)
+print("Training Word2Vec (GloVe) on original text...")
+glove_model = Word2Vec(
+    sentences=text_corpus,
+    vector_size=300,
+    window=5,
+    min_count=2,
+    workers=4,
+    sg=0,       # CBOW
+    epochs=5
+)
+glove_model.save(os.path.join(embedding_dir, "word2vec_glove.model"))
+glove_model.wv.save_word2vec_format(os.path.join(embedding_dir, "word2vec_glove.kv"))
+print("Saved Word2Vec (GloVe) model!")
+
+# 2. FastText on original text
+print("Training FastText on original text...")
+fasttext_word_model = FastText(
+    sentences=text_corpus,
+    vector_size=300,
+    window=5,
+    min_count=2,
+    workers=4,
+    sg=1,       # Skip-gram
+    epochs=5
+)
+fasttext_word_model.save(os.path.join(embedding_dir, "fasttext_word.model"))
+fasttext_word_model.wv.save_word2vec_format(os.path.join(embedding_dir, "fasttext_word.kv"))
+print("Saved FastText word model!")
+
+# 3. FastText on phonetic text
+print("Training FastText on phonetic text...")
+fasttext_phonetic_model = FastText(
+    sentences=phonetic_corpus,
+    vector_size=300,
+    window=5,
+    min_count=1,
+    workers=4,
+    sg=1,
+    epochs=5
+)
+fasttext_phonetic_model.save(os.path.join(embedding_dir, "fasttext_phonetic.model"))
+fasttext_phonetic_model.wv.save_word2vec_format(os.path.join(embedding_dir, "fasttext_phonetic.kv"))
+print("Saved FastText phonetic model!")
