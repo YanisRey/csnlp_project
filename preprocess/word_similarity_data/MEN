@@ -1,0 +1,157 @@
+
+<html>
+<head>
+<title>The MEN Test Collection</title>
+<link rev="made" href="mailto:elia.bruni@unitn.it">
+<meta name="description" 
+ content="Word similarity test collection">
+<meta name="keywords" 
+ content="Word Similarity, Computational Linguistics, 
+ Distributional Semantics, Multimodal Distributional Semantics,
+ Computer Vision, Mechanical Turk, CrowdFlower
+ Natural Language Processing, NLP, 
+ Natural Language Understanding, Natural Language Analysis, 
+ Information Retrieval, IR, Artificial Intelligence, AI, 
+ Machine Learning, Corpus Linguistics, Algorithm Design">
+<meta http-equiv="keywords" 
+ content="Word Similarity, Computational Linguistics, 
+ Distributional Semantics, Multimodal Distributional Semantics,
+ Computer Vision, Mechanical Turk, CrowdFlower
+ Natural Language Processing, NLP, 
+ Natural Language Understanding, Natural Language Analysis, 
+ Information Retrieval, IR, Artificial Intelligence, AI, 
+ Machine Learning, Corpus Linguistics, Algorithm Design">
+</head>
+
+<body>
+
+<h1>The MEN Test Collection</h1>
+
+<strong>Version:</strong> 0.2<br>
+<strong>Release date:</strong> April 30, 2012<br>
+<strong>Maintained by:</strong>
+  <a href="http://clic.cimec.unitn.it/~elia.bruni/">Elia Bruni</a>
+  (<a href="mailto:elia.bruni@unitn.it">elia.bruni@unitn.it</a>)
+
+
+<h2>Overview</h2>
+
+The <strong>MEN Test Collection</strong> contains two sets of English word pairs 
+(one for training and one for testing) together with human-assigned similarity judgments,
+obtained by crowdsourcing using 
+<a href="https://www.mturk.com/mturk/welcome">Amazon Mechanical Turk</a> via the
+<a href="http://crowdflower.com/">CrowdFlower</a> interface. 
+The collection can be used to train and/or test computer algorithms implementing 
+semantic similarity and relatedness measures.
+
+
+<h2>Description</h2>
+
+<strong>Sampling</strong>: The MEN data set consists of 3,000 word pairs, randomly
+selected from words that occur at least 700 times in the freely available 
+<a href="http://wacky.sslmit.unibo.it/">ukWaC and Wackypedia corpora combined</a> 
+(size: 1.9B and 820M tokens, respectively) 
+and at least 50 times (<strong>as tags</strong>) in the <a href="http://www.cs.cmu.edu/~biglou/resources/">opensourced subset</a> 
+of the <a href="http://en.wikipedia.org/wiki/ESP_game">ESP game dataset</a>. 
+In order to avoid picking unrelated pairs only, we sampled the pairs so that they 
+represent a balanced range of relatedness levels according to a text-based semantic score.
+
+<p>
+<strong>Design and data collection</strong>: Each pair was randomly matched with a
+comparison pair and rated in this setting (as either more or less
+related than the comparison point) by a single Turker (hence, there is
+no well-defined inter-subject agreement). 
+Rather than ask annotators to give an absolute score reflecting how
+much a word pair is semantically related (like in 
+<a href="http://www.cs.technion.ac.il/~gabr/resources/data/wordsim353/wordsim353.html">Wordsim353</a>), 
+we instead asked them to make comparative judgements on two pair exemplars at a time because
+this is both more natural for an individual annotator, and
+also permits seamless integration of the supervision from
+many annotators, each of whom may have a different internal "calibration"
+for the relatedness strengths.
+Moreover, binary choices were preferred because they make the construction of
+"right" and "wrong" control items straightforward.
+In total, each pair was
+rated in this way against 50 comparison pairs, thus obtaining a final
+score on a 50-point scale, although the Turkers' choices were binary. 
+<p>
+<strong>Instructions</strong>: We did not instruct the subjects about the difference
+between similarity and relatedness. We used only the second term, and
+gave examples involving both similarity, that is a special case of
+relatedness ("car-automobile"), and relatedness ("wheels-car").
+
+<p>
+<strong>Participants</strong>: We requested participants to be native speakers and only
+accepted those connecting from an English speaking country. We cannot
+guarantee that non-natives did not take part in the study, but our
+subject filtering techniques based on control "gold standard" pairs
+ensures that only the data of speakers with a good command of English
+were retained.
+<p>
+<strong>Agreement</strong>: Because raters saw the MEN pairs matched to 
+different random items, with the number of pairs also varying from rater 
+to rater, it is not possible to compute annotator agreement scores for MEN. 
+However, to get a sense of human agreement, the first and third author 
+rated all 3,000 pairs (presented in different random orders) on a 
+standard 1-7 Likert scale. The Spearman correlation of the two authors 
+is at 0.68, the correlation of their average ratings with the MEN 
+scores is at 0.84. On the one hand, this high correlation suggests 
+that MEN contains meaningful semantic ratings. On the other, it can 
+also be taken as an upper bound on what computational models can 
+realistically achieve when simulating the human MEN judgments.
+<p>
+All sets (<b>development</b>, <b>testing</b> and <b>combined</b>) are available in two formats:
+<ul>
+<li>POS-tagged form - see files with the <strong>lemma_form</strong> suffix
+<li>Natural form - see files with the <strong>natural_form</strong> suffix
+</ul>
+The first two columns in each file contain word pairs, followed by a column with the
+(floating-point) human scores. 
+
+<hr>
+
+<h2>Availability and usage</h2>
+
+Download the data set as a ZIP or TAR.GZ file:
+<ul>
+<li><a href="resources/MEN.zip" target="blank">MEN.zip</a> 
+</ul>
+<ul>
+<li><a href="resources/MEN.tar.gz" target="blank">MEN.tar.gz</a> 
+</ul>
+
+<p>
+If you publish results based on this data set, please cite as
+
+<!--
+<blockquote>
+<strong>Distributional Semantics in Technicolor</strong>
+E. Bruni, G. Boleda, M. Baroni and N. K. Tran. 
+In proceedings of the ACL 2012 (50th Annual Meeting of the Association for Computational Linguistics), East Stroudsburg PA: ACL. 
+[<a href="publications/bruni-etal-acl-2012.pdf">pdf</a>]
+</blockquote>
+-->
+
+<blockquote>
+<strong>Multimodal Distributional Semantics</strong>
+E. Bruni, N. K. Tran and M. Baroni. 
+Journal of Artificial Intelligence Research 49: 1-47. 
+[<a href="publications/bruni2014multimodal.pdf">pdf</a>]
+</blockquote>
+
+
+<p>
+Please also inform your readers of the current location of the data set:<br>
+<a href="http://clic.cimec.unitn.it/~elia.bruni/MEN">
+http://clic.cimec.unitn.it/~elia.bruni/MEN</a>
+
+
+<h2>Questions</h2>
+
+If you have questions or comments, please email me at 
+<a href="mailto:elia.bruni@unitn.it">elia.bruni@gmail.com</a>.
+
+
+</body>
+</html>
+

@@ -1,6 +1,16 @@
-"venv/" 
-"*.dll" 
-"*.lib" 
+# Virtual environment
 venv/
+
+# Compiled files
 *.pyc
 __pycache__/
+
+# Native extensions
+*.dll
+*.lib
+
+# Data and results
+data/phonetic_wikitext_with_misspellings_simplified/
+data/phonetic_wikitext_with_misspellings/
+results/trained_embeddings/
+

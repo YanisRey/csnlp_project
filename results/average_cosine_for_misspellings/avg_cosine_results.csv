@@ -1,0 +1,5 @@
+model,avg_cosine,valid_pairs_count
+phonetics/fasttext_phonetic.model,0.8286075,7123
+phonetics/fasttext_simplified_phonetic.model,0.7810119,7123
+text/fasttext_word.model,0.6758412,7123
+text/word2vec_glove.model,0.50743026,367

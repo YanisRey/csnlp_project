@@ -1,0 +1,39 @@
+import os
+import re
+from datasets import load_from_disk, DatasetDict
+
+# ARPAbet simplification function (removes stress markers)
+def simplify_arpabet(pronunciation: str) -> str:
+    return re.sub(r'([A-Z]+)[0-2]', r'\1', pronunciation)
+
+# Path to dataset
+base_path = "../data/phonetic_wikitext_with_misspellings"
+output_path = "../data/phonetic_wikitext_with_misspellings_simplified"
+
+# Load entire dataset (including all splits)
+print(f"\nLoading dataset from: {base_path}")
+dataset = load_from_disk(base_path)
+
+# Function to apply ARPAbet simplification to a batch
+def add_simplified_phonetics(batch):
+    return {
+        "simplified_phonetic_text": [simplify_arpabet(p) for p in batch["phonetic_text"]]
+    }
+
+# Apply simplification to each split
+print("Applying ARPAbet simplification...")
+simplified_dataset = DatasetDict()
+for split in dataset:
+    print(f"Processing split: {split}")
+    simplified = dataset[split].map(add_simplified_phonetics, batched=True, batch_size=32)
+    simplified_dataset[split] = simplified
+
+# Save back in Hugging Face format (Arrow files, split directories)
+print(f"\nSaving simplified dataset to: {output_path}")
+simplified_dataset.save_to_disk(output_path)
+
+# Show 3 examples from 'train'
+print("\nExamples from 'train':")
+for i in range(3):
+    ex = simplified_dataset["train"][i]
+    print(f"{ex['phonetic_text']} -> {ex['simplified_phonetic_text']}")

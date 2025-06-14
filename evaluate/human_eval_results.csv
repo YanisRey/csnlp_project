@@ -1,0 +1,13 @@
+dataset,model,spearman_corr,used_pairs,total_pairs,skipped_pairs
+MEN,fasttext_phonetic,0.0455582323607809,3000,3000,0
+MEN,fasttext_simplified_phonetic,0.03429070160278142,3000,3000,0
+MTurk-771,fasttext_phonetic,-0.0033294117784785178,771,771,0
+MTurk-771,fasttext_simplified_phonetic,0.06680018911041548,771,771,0
+rare_words_stanford,fasttext_phonetic,0.14366869248576905,2034,2034,0
+rare_words_stanford,fasttext_simplified_phonetic,0.13710886467775826,2034,2034,0
+rg65,fasttext_phonetic,0.10868638795446785,65,65,0
+rg65,fasttext_simplified_phonetic,-0.15095453078654925,65,65,0
+SimLex-999,fasttext_phonetic,-0.013256145849899079,1000,1000,0
+SimLex-999,fasttext_simplified_phonetic,0.06340268944266472,1000,1000,0
+wordsim353,fasttext_phonetic,-0.047413861607877146,353,353,0
+wordsim353,fasttext_simplified_phonetic,-0.09765504019710147,353,353,0
