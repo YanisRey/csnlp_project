@@ -8,6 +8,7 @@ __pycache__/
 # Native extensions
 *.dll
 *.lib
+*.bak
 
 # Data and results
 data/phonetic_wikitext_with_misspellings_simplified/
