@@ -53,14 +53,26 @@ def adapt_model(model, new_tokens):
     model.build_vocab([missing], update=True)
     model.train([missing], total_examples=len(missing), epochs=1)
     return True
-
 def load_embedding_model(path):
-    if path.endswith(".model"):
-        return Word2Vec.load(path)  # also loads FastText
-    elif path.endswith(".kv") or path.endswith(".txt") or path.endswith(".vec") or path.endswith(".bin"):
-        return KeyedVectors.load_word2vec_format(path, binary=path.endswith(".bin"))
-    else:
-        raise ValueError(f"Unsupported model format: {path}")
+    try:
+        # Force loading as FastText if filename suggests it
+        if "fasttext" in path and path.endswith(".model"):
+            return FastText.load(path)
+        else:
+            # Otherwise fallback to Word2Vec or KeyedVectors
+            return Word2Vec.load(path)
+    except (TypeError, AttributeError, FileNotFoundError):
+        try:
+            return KeyedVectors.load(path)
+        except:
+            try:
+                return KeyedVectors.load_word2vec_format(
+                    path,
+                    binary=path.endswith(".bin")
+                )
+            except:
+                raise ValueError(f"Could not load model from {path} with any supported method")
+
 
 # === Load misspellings ===
 
@@ -85,8 +97,9 @@ phonetic_models = {
 }
 
 word_models = {
-    "fasttext_word.model": "../results/trained_embeddings/words_models/fasttext_word.model",
-    "word2vec_glove.model": "../results/trained_embeddings/words_models/word2vec_glove.model"
+    "fasttext_word.model": "../results/trained_embeddings/word_models/fasttext_word.model",
+    "spelling_aware_fasttext_word": "../results/trained_embeddings/word_models/fasttext_word_spellingaware.model",
+    "word2vec_glove.model": "../results/trained_embeddings/word_models/word2vec_glove.model"
 }
 
 def adapt_and_eval_individual(model, tokens, is_phonetic=False, simplify=False):
@@ -155,7 +168,25 @@ def adapt_and_eval_combined(p_model, p_simplify, w_model):
 
     avg_sim = np.mean(sims) if sims else None
     return avg_sim, valid_count
+    
+# === Evaluate Word Models ===
 
+for fname, path in word_models.items():
+    print(f"\n🔍 Evaluating word model (with adaptation): {fname}")
+    try:
+        model = load_embedding_model(path)
+    except Exception as e:
+        print(f"❌ Failed to load model: {e}")
+        continue
+
+    tokens = {w for pair in pairs for w in pair}
+    avg_sim, valid_count = adapt_and_eval_individual(model, tokens, is_phonetic=False)
+    print(f"✅ text/{fname} - Avg Cosine: {avg_sim:.4f} over {valid_count} pairs")
+    results.append({
+        "model": f"text/{fname}",
+        "avg_cosine": avg_sim,
+        "valid_pairs_count": valid_count
+    })
 
 # === Evaluate Phonetic Models ===
 
@@ -179,24 +210,6 @@ for fname, info in phonetic_models.items():
         "valid_pairs_count": valid_count
     })
 
-# === Evaluate Word Models ===
-
-for fname, path in word_models.items():
-    print(f"\n🔍 Evaluating word model (with adaptation): {fname}")
-    try:
-        model = load_embedding_model(path)
-    except Exception as e:
-        print(f"❌ Failed to load model: {e}")
-        continue
-
-    tokens = {w for pair in pairs for w in pair}
-    avg_sim, valid_count = adapt_and_eval_individual(model, tokens, is_phonetic=False)
-    print(f"✅ text/{fname} - Avg Cosine: {avg_sim:.4f} over {valid_count} pairs")
-    results.append({
-        "model": f"text/{fname}",
-        "avg_cosine": avg_sim,
-        "valid_pairs_count": valid_count
-    })
 
 # === Evaluate Combined Models ===
 

@@ -7,8 +7,8 @@ def simplify_arpabet(pronunciation: str) -> str:
     return re.sub(r'([A-Z]+)[0-2]', r'\1', pronunciation)
 
 # Path to dataset
-base_path = "../data/phonetic_wikitext_with_misspellings"
-output_path = "../data/phonetic_wikitext_with_misspellings_simplified"
+base_path = "../../data/phonetic_wikitext_with_misspellings"
+output_path = "../../data/phonetic_wikitext_with_misspellings_simplified"
 
 # Load entire dataset (including all splits)
 print(f"\nLoading dataset from: {base_path}")
