@@ -1,7 +1,0 @@
-import urllib.request
-
-url = "https://raw.githubusercontent.com/kudkudak/word-embeddings-benchmarks/master/web/datasets/MEN_dataset_natural_form_full"
-save_path = "MEN_dataset_natural_form_full"
-
-urllib.request.urlretrieve(url, save_path)
-print("Downloaded MEN dataset.")

@@ -111,8 +111,8 @@ if __name__ == '__main__':
     print("Phonetic transformation completed!")
 
     print("Saving the phonetic dataset to disk...")
-    dataset.save_to_disk("../data/phonetic_wikitext_with_misspellings")
-    print("Phonetic dataset saved to '../data/phonetic_wikitext_with_misspellings'!")
+    dataset.save_to_disk("../../data/phonetic_wikitext_with_misspellings")
+    print("Phonetic dataset saved to '../../data/phonetic_wikitext_with_misspellings'!")
 
     print(f"Found {len(clean_examples)} clean examples.")
 

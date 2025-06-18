@@ -68,13 +68,25 @@ def adapt_model(model, new_tokens):
     model.train([missing], total_examples=len(missing), epochs=1)
     return True
 
+
 def load_embedding_model(path):
-    if path.endswith(".model"):
-        return Word2Vec.load(path)
-    elif path.endswith(".kv") or path.endswith(".txt") or path.endswith(".vec") or path.endswith(".bin"):
-        return KeyedVectors.load_word2vec_format(path, binary=path.endswith(".bin"))
-    else:
-        raise ValueError(f"Unsupported model format: {path}")
+    try:
+        # First try loading as regular model (Word2Vec/FastText)
+        model = Word2Vec.load(path)
+        return model
+    except (TypeError, AttributeError):
+        try:
+            # If that fails, try loading as KeyedVectors
+            return KeyedVectors.load(path)
+        except:
+            # Finally try word2vec format
+            try:
+                return KeyedVectors.load_word2vec_format(
+                    path, 
+                    binary=path.endswith(".bin")
+                )
+            except:
+                raise ValueError(f"Could not load model from {path} with any supported method")
 
 def normalize(vec, c):
     if vec is None:
@@ -100,8 +112,9 @@ print("📦 Loading models...")
 model_paths = {
     "fasttext_phonetic": "../results/trained_embeddings/phonetics_models/fasttext_phonetic.model",
     "fasttext_simplified_phonetic": "../results/trained_embeddings/phonetics_models/fasttext_simplified_phonetic.model",
-    "fasttext_word": "../results/trained_embeddings/words_models/fasttext_word.model",
-    "word2vec_glove": "../results/trained_embeddings/words_models/word2vec_glove.model"
+    "fasttext_word": "../results/trained_embeddings/word_models/fasttext_word.model",
+    "word2vec_glove": "../results/trained_embeddings/word_models/word2vec_glove.model",
+    "spelling_aware_fasttext_word": "../results/trained_embeddings/word_models/fasttext_word_spellingaware_oov.model"
 }
 
 loaded_models = {}
@@ -125,7 +138,8 @@ individual_models = [
     ("fasttext_phonetic", False),
     ("fasttext_simplified_phonetic", True),
     ("fasttext_word", False),
-    ("word2vec_glove", False)
+    ("word2vec_glove", False),
+    ("spelling_aware_fasttext_word", False)
 ]
 
 for filename in human_files:

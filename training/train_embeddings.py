@@ -29,7 +29,7 @@ print("Preparing training corpora...")
 text_corpus = [text.split() for text in train_dataset["original_text"]]
 phonetic_corpus = [phonetic.split() for phonetic in train_dataset["phonetic_text"]]
 
-"""# 1. GloVe-like model (Word2Vec CBOW)
+# 1. GloVe-like model (Word2Vec CBOW)
 print("Training Word2Vec (GloVe) on original text...")
 glove_model = Word2Vec(
     sentences=text_corpus,
@@ -57,7 +57,7 @@ fasttext_word_model = FastText(
 )
 fasttext_word_model.save(os.path.join(embedding_dir, "fasttext_word.model"))
 fasttext_word_model.wv.save_word2vec_format(os.path.join(embedding_dir, "fasttext_word.kv"))
-print("Saved FastText word model!")"""
+print("Saved FastText word model!")
 
 # 3. FastText on phonetic text
 print("Training FastText on phonetic text...")

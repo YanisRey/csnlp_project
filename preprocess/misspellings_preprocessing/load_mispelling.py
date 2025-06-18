@@ -43,7 +43,7 @@ for link in subpage_links:
                     misspellings_dict[correct] = [misspelling]
 
 # Save the dictionary to a JSON file
-with open('../misspellings/misspellings.json', 'w') as f:
+with open('../../data/misspellings/misspellings.json', 'w') as f:
     json.dump(misspellings_dict, f, indent=4)
 
-print("Misspellings saved to 'misspellings.json'")
+print("Misspellings saved to '../../data/misspellings/misspellings.json'")

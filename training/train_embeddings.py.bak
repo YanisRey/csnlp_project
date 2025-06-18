@@ -68,7 +68,7 @@ fasttext_phonetic_model = FastText(
     min_count=2,
     workers=4,
     sg=1,
-    epochs=5
+    epochs=10
 )
 fasttext_phonetic_model.save(os.path.join(phonetics_embedding_dir, "fasttext_phonetic.model"))
 fasttext_phonetic_model.wv.save_word2vec_format(os.path.join(phonetics_embedding_dir, "fasttext_phonetic.kv"))
