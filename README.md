@@ -93,10 +93,17 @@ pip install -r requirements.txt
 ### Preprocessing
 
 ```bash
-python preprocess/text_preprocessing/load_data.py
-python preprocess/text_preprocessing/simplify_phonetics.py
-python preprocess/misspellings_preprocessing/load_mispelling.py
-python preprocess/misspellings_preprocessing/clean_misspellings.py
+python scripts/load_and_clean_data.py
+
+### Training All Models
+
+```bash
+python scripts/train_all_models.py
+
+### Evaluate All Models
+
+```bash
+python scripts/evaluate_all_models.py
 
 ---
 
