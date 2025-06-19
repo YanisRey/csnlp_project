@@ -55,7 +55,7 @@ dataset["train"] = Dataset.from_list(clean_examples)
 dataset = dataset.rename_column("text", "original_text")
 
 # Apply misspellings with 0.5 probability
-def apply_misspellings(example, prob=0.5):
+def apply_misspellings(example, prob=0.1):
     words = example["original_text"].split()
     modified = []
     for word in words:

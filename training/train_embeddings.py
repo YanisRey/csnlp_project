@@ -64,7 +64,7 @@ print("Training FastText on phonetic text...")
 fasttext_phonetic_model = FastText(
     sentences=phonetic_corpus,
     vector_size=300,
-    window=5,
+    window=3,
     min_count=2,
     workers=4,
     sg=1,
