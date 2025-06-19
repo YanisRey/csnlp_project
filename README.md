@@ -83,10 +83,11 @@ Introduces a **custom loss function** to fine-tune FastText so that:
 
 Clone the repo and install dependencies:
 
-````bash
+```bash
 git clone https://github.com/YanisRey/csnlp_project.git
 cd csnlp_project
 pip install -r requirements.txt
+```
 
 ## 🔧 Example Workflow
 
@@ -94,16 +95,19 @@ pip install -r requirements.txt
 
 ```bash
 python scripts/load_and_clean_data.py
+```
 
 ### Training All Models
 
 ```bash
 python scripts/train_all_models.py
+```
 
 ### Evaluate All Models
 
 ```bash
 python scripts/evaluate_all_models.py
+```
 
 ---
 
@@ -134,4 +138,7 @@ MIT License © 2025 Yanis Merzouki
 **Yanis Merzouki**
 GitHub: [https://github.com/YanisRey](https://github.com/YanisRey)
 Email: ymerzouki001@gmail.com
-````
+
+```
+
+```
