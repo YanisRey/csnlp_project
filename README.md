@@ -56,9 +56,6 @@ Introduces a **custom loss function** to fine-tune FastText so that:
 - `training/train_finetuned_fasttext.py`  
   Fine-tunes the FastText word model using a spelling-aware loss function.
 
-- `training/patch_finetuned_fasttext.py`  
-  Combines the fine-tuned and original FastText models to support OOV word handling.
-
 ### 📊 Evaluation
 
 - `evaluate/avg_cos_per_misspelling.py`  
@@ -94,19 +91,19 @@ pip install -r requirements.txt
 ### Preprocessing
 
 ```bash
-python scripts/load_and_clean_data.py
+scripts\load_and_clean_data.bat
 ```
 
 ### Training All Models
 
 ```bash
-python scripts/train_all_models.py
+scripts\train_all_models.bat
 ```
 
 ### Evaluate All Models
 
 ```bash
-python scripts/evaluate_all_models.py
+scripts\evaluate_all_models.bat
 ```
 
 ---
@@ -133,11 +130,15 @@ MIT License © 2025 Yanis Merzouki
 
 ---
 
-## 📫 Contact
+## 👥 Contributors
 
-**Yanis Merzouki**
-GitHub: [https://github.com/YanisRey](https://github.com/YanisRey)
-Email: ymerzouki001@gmail.com
+- **Yanis Merzouki**  
+  GitHub: [YanisRey](https://github.com/YanisRey)  
+  Email: ymerzouki001@gmail.com
+
+- **Tingting Xu**  
+  GitHub: [tingting-xu824](https://github.com/tingting-xu824)  
+  Email: xuting@student.ethz.ch
 
 ```
 
