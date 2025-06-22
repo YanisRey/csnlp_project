@@ -1,25 +1,25 @@
-dataset,model,spearman_corr,used_pairs,total_pairs,skipped_pairs
-MEN,fasttext_word (with OOV),0.7020130968385528,3000,3000,0
-MEN,fasttext_word (strict vocab),0.7010083625451422,2991,3000,9
-MEN,word2vec_glove (original),0.6289843556969305,2991,3000,9
-MEN,spelling_aware_fasttext_word (original),0.7012046371952092,2991,3000,9
-MTurk-771,fasttext_word (with OOV),0.6158998749159089,771,771,0
-MTurk-771,fasttext_word (strict vocab),0.6165510939040979,769,771,2
-MTurk-771,word2vec_glove (original),0.5699119366437377,769,771,2
-MTurk-771,spelling_aware_fasttext_word (original),0.6145859463451897,769,771,2
-rare_words_stanford,fasttext_word (with OOV),0.4769751074998249,2034,2034,0
-rare_words_stanford,fasttext_word (strict vocab),0.49891378444000933,1555,2034,479
-rare_words_stanford,word2vec_glove (original),0.36349386869840333,1555,2034,479
-rare_words_stanford,spelling_aware_fasttext_word (original),0.4991975489070514,1555,2034,479
-rg65,fasttext_word (with OOV),0.6990853592398075,65,65,0
-rg65,fasttext_word (strict vocab),0.6990853592398075,65,65,0
-rg65,word2vec_glove (original),0.5773295041635276,65,65,0
-rg65,spelling_aware_fasttext_word (original),0.6977084755798174,65,65,0
-SimLex-999,fasttext_word (with OOV),0.34994713585077,1001,1001,0
-SimLex-999,fasttext_word (strict vocab),0.3460682247881543,999,1001,2
-SimLex-999,word2vec_glove (original),0.3215768979976438,999,1001,2
-SimLex-999,spelling_aware_fasttext_word (original),0.3454361932274442,999,1001,2
-wordsim353,fasttext_word (with OOV),0.671942633674208,353,353,0
-wordsim353,fasttext_word (strict vocab),0.671942633674208,353,353,0
-wordsim353,word2vec_glove (original),0.6215831898356554,353,353,0
-wordsim353,spelling_aware_fasttext_word (original),0.6711269171909516,353,353,0
+dataset,model,spearman_corr,used_pairs,skipped_pairs
+MEN,fasttext_word (OOV),0.6966362907110158,3000,0
+MEN,fasttext_word (strict),0.6955283316443839,2991,9
+MEN,word2vec_glove (strict),0.689920121870115,2991,9
+MEN,spelling_aware_fasttext_word (strict),0.7012046371952092,2991,9
+MTurk-771,fasttext_word (OOV),0.6088335088187105,771,0
+MTurk-771,fasttext_word (strict),0.6083502028410331,769,2
+MTurk-771,word2vec_glove (strict),0.606270860816344,769,2
+MTurk-771,spelling_aware_fasttext_word (strict),0.6145859463451897,769,2
+rare_words_stanford,fasttext_word (OOV),0.4646208904813218,2034,0
+rare_words_stanford,fasttext_word (strict),0.4906767198853909,1555,479
+rare_words_stanford,word2vec_glove (strict),0.3817968988859924,1555,479
+rare_words_stanford,spelling_aware_fasttext_word (strict),0.4991975489070514,1555,479
+rg65,fasttext_word (OOV),0.664969241886716,65,0
+rg65,fasttext_word (strict),0.664969241886716,65,0
+rg65,word2vec_glove (strict),0.6557244515982101,65,0
+rg65,spelling_aware_fasttext_word (strict),0.6977084755798174,65,0
+SimLex-999,fasttext_word (OOV),0.3296581109928393,1001,0
+SimLex-999,fasttext_word (strict),0.32828270585506897,999,2
+SimLex-999,word2vec_glove (strict),0.3603526098827369,999,2
+SimLex-999,spelling_aware_fasttext_word (strict),0.3454361932274442,999,2
+wordsim353,fasttext_word (OOV),0.6673814417399057,353,0
+wordsim353,fasttext_word (strict),0.6673814417399057,353,0
+wordsim353,word2vec_glove (strict),0.6824046749980073,353,0
+wordsim353,spelling_aware_fasttext_word (strict),0.6711269171909516,353,0

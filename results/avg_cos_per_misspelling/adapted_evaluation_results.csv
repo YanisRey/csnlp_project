@@ -1,9 +1,7 @@
 model,avg_cosine,valid_pairs_count
-text/fasttext_word.model (with OOV),0.67584115,7123
-text/fasttext_word.model (strict vocab),0.73873895,367
+text/fasttext_word.model (with OOV),0.62671316,7123
+text/fasttext_word.model (strict vocab),0.70938295,367
 text/spelling_aware_fasttext_word (original),0.7435324,367
-text/word2vec_glove.model (original),0.50743026,367
-phonetics/fasttext_phonetic.model (with OOV),0.80785286,7123
-phonetics/fasttext_phonetic.model (strict vocab),0.80785286,7123
-phonetics/fasttext_simplified_phonetic.model (with OOV),0.9072451,7123
-phonetics/fasttext_simplified_phonetic.model (strict vocab),0.9072451,7123
+text/word2vec_glove.model (original),0.6257109,367
+phonetics/fasttext_phonetic_simplified.model (with OOV),0.30498227,7123
+phonetics/fasttext_phonetic_simplified.model (strict vocab),0.30498227,7123

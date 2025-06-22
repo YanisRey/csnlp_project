@@ -6,12 +6,12 @@ call .\venv\Scripts\activate
 setlocal enabledelayedexpansion
 
 :: Define scripts to run (same order as Python version)
-set scripts[1]=..\preprocess\text_preprocessing\load_data.py
-set scripts[2]=..\preprocess\text_preprocessing\simplify_phonetics.py
-set scripts[3]=..\preprocess\misspellings_preprocessing\load_mispelling.py
-set scripts[4]=..\preprocess\misspellings_preprocessing\clean_misspellings.py
+set scripts[1]=..\preprocess\misspellings_preprocessing\load_mispelling.py
+set scripts[2]=..\preprocess\misspellings_preprocessing\clean_misspellings.py
+set scripts[3]=..\preprocess\text_preprocessing\load_data.py
 
-set total=4
+
+set total=3
 set count=0
 
 :loop

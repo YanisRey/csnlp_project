@@ -1,44 +1,68 @@
 import json
 import random
 import re
+from pathlib import Path
 from datasets import load_dataset, Dataset
 from g2p_en import G2p
 import nltk
 from nltk.corpus import cmudict
 
-# Ensure NLTK CMU Pronouncing Dictionary is downloaded
-print("Downloading NLTK CMU Pronouncing Dictionary (if not already downloaded)...")
+# Reproducibility
+SEED = 42
+random.seed(SEED)
+
+# Load CMU pronouncing dictionary
 nltk.download('cmudict', quiet=True)
 pronouncing_dict = cmudict.dict()
-print("NLTK CMU Pronouncing Dictionary is ready!")
+g2p_model = G2p()
 
-# Load misspellings dictionary
+# Define ARPAbet phonemes and mappings
+BASE_PHONEMES = [
+    'AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH', 'ER', 'EY', 'IH',
+    'IY', 'OW', 'OY', 'UH', 'UW'
+]
+STRESSED = [p + s for p in BASE_PHONEMES for s in ['0', '1', '2']]
+CONSONANTS = [
+    'B', 'CH', 'D', 'DH', 'F', 'G', 'HH', 'JH', 'K', 'L', 'M', 'N',
+    'NG', 'P', 'R', 'S', 'SH', 'T', 'TH', 'V', 'W', 'Y', 'Z', 'ZH'
+]
+ARPABET_PHONEMES = BASE_PHONEMES + STRESSED + CONSONANTS
+
+# Char encoding map
+disallowed_chars = {' ', '\t', '\n', '\r', '\\', '\'', '"'}
+available_chars = [chr(i) for i in range(33, 127) if chr(i) not in disallowed_chars]
+PHONEME_TO_CHAR = dict(zip(ARPABET_PHONEMES, available_chars))
+CHAR_TO_PHONEME = {v: k for k, v in PHONEME_TO_CHAR.items()}
+
+def encode_phonemes(phoneme_list):
+    return ''.join(PHONEME_TO_CHAR.get(p, '?') for p in phoneme_list)
+
+def remove_stress(phoneme_list):
+    return [re.sub(r'\d$', '', p) for p in phoneme_list]
+
+def normalize_phonemes(phoneme_seq):
+    return [re.sub(r'\d$', '', p) if re.sub(r'\d$', '', p) in PHONEME_TO_CHAR else p for p in phoneme_seq]
+
+def get_encodings(text):
+    encoded_words, simplified_words = [], []
+    for word in text.split():
+        entry = pronouncing_dict.get(word.lower())
+        if entry:
+            phonemes = entry[0]
+        else:
+            raw = g2p_model(word)
+            phonemes = [p for p in raw if re.match(r'^[A-Z]{2,3}\d?$', p)]
+        normed = normalize_phonemes(phonemes)
+        encoded_words.append(encode_phonemes(normed))
+        simplified_words.append(encode_phonemes(remove_stress(normed)))
+    return ' '.join(encoded_words), ' '.join(simplified_words)
+
+# Load real misspellings dictionary
 print("Loading misspellings dictionary from misspellings.json...")
 with open("../../data/misspellings/cleaned_misspellings.json", "r") as f:
     misspellings_dict = json.load(f)
 print("Misspellings dictionary loaded successfully!")
 
-# Load WikiText dataset
-print("Loading WikiText dataset...")
-dataset = load_dataset("wikitext", "wikitext-103-v1")
-print("WikiText dataset loaded successfully!")
-
-# Filter WikiText for real sentences
-print("Filtering WikiText for natural language lines...")
-def is_clean_text(line):
-    line = line.strip()
-    if len(line.split()) < 3:               return False
-    if line.startswith("="):                return False
-    if line.isupper():                      return False
-    if re.match(r'^[\W_]+$', line):        return False
-    return True
-
-clean_examples = [ex for ex in dataset["train"] if is_clean_text(ex["text"])]
-dataset["train"] = Dataset.from_list(clean_examples)
-dataset = dataset.rename_column("text", "original_text")
-print(f"Kept {len(clean_examples)} clean examples.")
-
-# Apply misspellings
 def apply_misspellings(example, prob=0.15):
     words = example["original_text"].split()
     out = []
@@ -46,52 +70,52 @@ def apply_misspellings(example, prob=0.15):
         lw = w.lower()
         if lw in misspellings_dict and random.random() < prob:
             m = random.choice(misspellings_dict[lw])
-            # preserve capitalization
-            if w[0].isupper(): m = m.capitalize()
+            if w[0].isupper():
+                m = m.capitalize()
             out.append(m)
         else:
             out.append(w)
     return {"misspelled_text": " ".join(out)}
 
-# Initialize G2P
-print("Loading g2p_en model...")
-g2p_model = G2p()
-print("g2p_en model ready!")
+def add_phonetic_encodings(batch):
+    stress, simple = [], []
+    for sentence in batch["misspelled_text"]:
+        enc1, enc2 = get_encodings(sentence)
+        stress.append(enc1)
+        simple.append(enc2)
+    return {
+        "phonetic_text": stress,
+        "phonetic_text_simplified": simple
+    }
 
-def get_phonetics(text):
-    """
-    Returns a **flat list** of all phoneme tokens in the sentence.
-    """
-    tokens = []
-    for word in text.split():
-        # Try CMUdict first
-        entry = pronouncing_dict.get(word.lower())
-        if entry:
-            # entry[0] is a list of ARPAbet tokens, e.g. ["M","EH1","T"]
-            tokens.extend(entry[0])
-        else:
-            # fallback to g2p
-            raw = g2p_model(word)
-            # keep only alphabetic or stress markers
-            clean = [p for p in raw if p.isalpha() or p in ("ˈ","ˌ")]
-            tokens.extend(clean)
-    return " ".join(tokens)
+def is_clean_text(line):
+    line = line.strip()
+    if len(line.split()) < 3: return False
+    if line.startswith("="): return False
+    if line.isupper(): return False
+    if re.match(r'^[\W_]+$', line): return False
+    return True
 
-def add_phonetics(batch):
-    return {"phonetic_text": [get_phonetics(s) for s in batch["misspelled_text"]]}
-
+# Main execution
 if __name__ == "__main__":
-    # inject misspellings
-    print("Injecting misspellings...")
+    print("Loading WikiText dataset...")
+    dataset = load_dataset("wikitext", "wikitext-103-v1", split="train")
+    dataset = dataset.rename_column("text", "original_text")
+
+    print("Filtering WikiText for natural language lines...")
+    clean_examples = [ex for ex in dataset if is_clean_text(ex["original_text"])]
+    dataset = Dataset.from_list(clean_examples)
+    print(f"Kept {len(dataset)} clean examples.")
+
+    print("Applying misspellings...")
     dataset = dataset.map(apply_misspellings)
-    
-    # apply phonetics
-    print("Applying phonetic conversion...")
-    dataset = dataset.map(add_phonetics, batched=True, batch_size=8)
-    
-    # save
+
+    print("Encoding phonetics...")
+    dataset = dataset.map(add_phonetic_encodings, batched=True, batch_size=8)
+
+    # Save final dataset
     out_path = "../../data/phonetic_wikitext_with_misspellings"
-    print(f"Saving to {out_path}...")
+    Path(out_path).mkdir(parents=True, exist_ok=True)
+    print(f"\nSaving dataset to {out_path}...")
     dataset.save_to_disk(out_path)
     print("Done!")
-

@@ -31,10 +31,7 @@ Introduces a **custom loss function** to fine-tune FastText so that:
 ### 🧹 Preprocessing
 
 - `preprocess/text_preprocessing/load_data.py`  
-  Loads WikiText and generates phonetic transcriptions using CMUdict or G2P. Saves output to `data/phonetic_wikitext_with_misspellings/`.
-
-- `preprocess/text_preprocessing/simplify_phonetics.py`  
-  Simplifies phonetic transcriptions by removing numerical stress markers. Saves output to `data/phonetic_wikitext_with_misspellings_simplified/`.
+  Loads WikiText and generates both normal and simplified phonetic transcriptions using CMUdict or G2P. Saves output to `data/phonetic_wikitext_with_misspellings/`.
 
 - `preprocess/misspellings_preprocessing/load_mispelling.py`  
   Loads misspellings from Wikipedia’s common misspellings page. Saves as JSON to `data/misspellings/`.
@@ -49,9 +46,6 @@ Introduces a **custom loss function** to fine-tune FastText so that:
 
   - `results/trained_embeddings/word_models/`
   - `results/trained_embeddings/phonetics_models/`
-
-- `training/train_simplified_phonetics.py`  
-  Trains a FastText phonetic model using the simplified phonetics dataset.
 
 - `training/train_finetuned_fasttext.py`  
   Fine-tunes the FastText word model using a spelling-aware loss function.
@@ -68,9 +62,9 @@ Introduces a **custom loss function** to fine-tune FastText so that:
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### Main Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - PyTorch
 - Gensim
 - spaCy or NLTK
@@ -112,8 +106,7 @@ scripts\evaluate_all_models.bat
 
 Evaluation focuses on:
 
-- Cosine similarity between correct and misspelled words
-- Improvement in semantic similarity metrics (compared to standard embeddings)
+- Average cosine similarity between correct and misspelled words
 - Human correlation benchmarks
 
 ---

@@ -15,3 +15,6 @@ data/phonetic_wikitext_with_misspellings_simplified/
 data/phonetic_wikitext_with_misspellings/
 results/trained_embeddings/
 
+#testing files
+*/test.py
+
