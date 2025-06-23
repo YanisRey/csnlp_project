@@ -7,9 +7,7 @@ source ./venv/bin/activate
 # Define training scripts to run
 scripts=(
   "../training/train_embeddings.py"
-  "../training/train_simplified_phonetics.py"
   "../training/train_finetuned_fasttext.py"
-  "../training/patch_finetuned_fasttext.py"
 )
 
 total=${#scripts[@]}

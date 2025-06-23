@@ -6,8 +6,6 @@ source ./venv/bin/activate
 
 # Define scripts to run (same order as Python version)
 scripts=(
-  "../preprocess/misspellings_preprocessing/load_mispelling.py"
-  "../preprocess/misspellings_preprocessing/clean_misspellings.py"
   "../preprocess/text_preprocessing/load_data.py"
 )
 
