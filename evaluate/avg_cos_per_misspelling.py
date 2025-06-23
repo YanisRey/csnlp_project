@@ -54,7 +54,7 @@ CONSONANTS = [
 ARPABET_PHONEMES = BASE_PHONEMES + STRESSED + CONSONANTS
 
 # Safe ASCII characters (excluding space, tab, newline, carriage return)
-disallowed_chars = {' ', '\t', '\n', '\r', '\\', '\'', '"'}
+disallowed_chars = {' ', '\t', '\n', '\r', '\\'}#{' ', '\t', '\n', '\r', '\\', '\'', '"'}
 available_chars = [chr(i) for i in range(33, 127) if chr(i) not in disallowed_chars]
 
 # Sanity check

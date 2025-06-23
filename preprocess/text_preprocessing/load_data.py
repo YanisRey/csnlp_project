@@ -29,7 +29,7 @@ CONSONANTS = [
 ARPABET_PHONEMES = BASE_PHONEMES + STRESSED + CONSONANTS
 
 # Char encoding map
-disallowed_chars = {' ', '\t', '\n', '\r', '\\', '\'', '"'}
+disallowed_chars = {' ', '\t', '\n', '\r', '\\'}#{' ', '\t', '\n', '\r', '\\', '\'', '"'}
 available_chars = [chr(i) for i in range(33, 127) if chr(i) not in disallowed_chars]
 PHONEME_TO_CHAR = dict(zip(ARPABET_PHONEMES, available_chars))
 CHAR_TO_PHONEME = {v: k for k, v in PHONEME_TO_CHAR.items()}

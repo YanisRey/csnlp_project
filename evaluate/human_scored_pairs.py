@@ -31,7 +31,7 @@ CONSONANTS = [
 ARPABET_PHONEMES = BASE_PHONEMES + STRESSED + CONSONANTS
 
 # Safe ASCII
-disallowed_chars = {' ', '\t', '\n', '\r', '\\', '\'', '"'}
+disallowed_chars = {' ', '\t', '\n', '\r', '\\'}#{' ', '\t', '\n', '\r', '\\', '\'', '"'}
 available_chars = [chr(i) for i in range(33, 127) if chr(i) not in disallowed_chars]
 if len(ARPABET_PHONEMES) > len(available_chars):
     raise ValueError("Not enough safe ASCII characters to encode all phonemes.")
@@ -93,7 +93,7 @@ def load_embedding_model(path):
 # === LOAD MODELS ===
 print("📦 Loading models...")
 model_paths = {
-    "fasttext_phonetic": "../results/trained_embeddings/phonetics_models/fasttext_phonetic.model",
+    #"fasttext_phonetic": "../results/trained_embeddings/phonetics_models/fasttext_phonetic.model",
     "fasttext_phonetic_simplified": "../results/trained_embeddings/phonetics_models/fasttext_phonetic_simplified.model",
     "fasttext_word": "../results/trained_embeddings/word_models/fasttext_word.model",
     "word2vec_glove": "../results/trained_embeddings/word_models/word2vec_glove.model",
@@ -101,7 +101,6 @@ model_paths = {
 }
 
 individual_models = [
-    #("fasttext_phonetic", False),
     ("fasttext_phonetic_simplified", True),
     ("fasttext_word", False),
     ("word2vec_glove", False),
@@ -136,25 +135,6 @@ for filename in human_files:
         model_vocab = get_vocab(model)
         is_phonetic = "phonetic" in model_name
 
-        # With OOV only for fasttext_word
-        if model_name == "fasttext_word":
-            print("   🔍 OOV Handling")
-            sims, gold, skipped = [], [], 0
-            for _, row in df.iterrows():
-                w1, w2, score = row['word1'], row['word2'], row['score']
-                v1, v2 = lookup(model, w1), lookup(model, w2)
-                if v1 is None or v2 is None:
-                    skipped += 1
-                    continue
-                sim = cosine_vecs(v1, v2)
-                if sim is not None:
-                    sims.append(sim)
-                    gold.append(score)
-            if sims:
-                corr, _ = spearmanr(sims, gold)
-                all_results.append({"dataset": dataset_name, "model": f"{model_name} (OOV)", "spearman_corr": corr, "used_pairs": len(sims), "skipped_pairs": skipped})
-                print(f"      ✅ Spearman: {corr:.4f} ({len(sims)}/{len(df)})")
-
         # Strict vocab for all models
         print(f"   🔍 Strict Vocab: {model_name}")
         sims, gold, skipped = [], [], 0
@@ -182,6 +162,26 @@ for filename in human_files:
             corr, _ = spearmanr(sims, gold)
             all_results.append({"dataset": dataset_name, "model": f"{model_name} (strict)", "spearman_corr": corr, "used_pairs": len(sims), "skipped_pairs": skipped})
             print(f"      ✅ Spearman: {corr:.4f} ({len(sims)}/{len(df)})")
+            
+        # With OOV only for fasttext_word
+        if isinstance(model, FastText):
+            print("   🔍 OOV Handling")
+            sims, gold, skipped = [], [], 0
+            for _, row in df.iterrows():
+                w1, w2, score = row['word1'], row['word2'], row['score']
+                v1, v2 = lookup(model, w1), lookup(model, w2)
+                if v1 is None or v2 is None:
+                    skipped += 1
+                    continue
+                sim = cosine_vecs(v1, v2)
+                if sim is not None:
+                    sims.append(sim)
+                    gold.append(score)
+            if sims:
+                corr, _ = spearmanr(sims, gold)
+                all_results.append({"dataset": dataset_name, "model": f"{model_name} (OOV)", "spearman_corr": corr, "used_pairs": len(sims), "skipped_pairs": skipped})
+                print(f"      ✅ Spearman: {corr:.4f} ({len(sims)}/{len(df)})")
+
 
 # === SAVE ===
 pd.DataFrame(all_results).to_csv("../results/human_scored_word_pairs/human_eval_results.csv", index=False)

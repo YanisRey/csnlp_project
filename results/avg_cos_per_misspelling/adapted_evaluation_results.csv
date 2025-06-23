@@ -3,5 +3,5 @@ text/fasttext_word.model (with OOV),0.62671316,7123
 text/fasttext_word.model (strict vocab),0.70938295,367
 text/spelling_aware_fasttext_word (original),0.7435324,367
 text/word2vec_glove.model (original),0.6257109,367
-phonetics/fasttext_phonetic_simplified.model (with OOV),0.30498227,7123
-phonetics/fasttext_phonetic_simplified.model (strict vocab),0.30498227,7123
+phonetics/fasttext_phonetic_simplified.model (with OOV),0.2978804,7123
+phonetics/fasttext_phonetic_simplified.model (strict vocab),0.2978804,7123
