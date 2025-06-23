@@ -21,8 +21,8 @@ Enhances traditional embeddings by incorporating **phonetic information** to cap
 Introduces a **custom loss function** to fine-tune FastText so that:
 
 - Similar misspellings (small edit distance) are embedded closer.
-- Fine-tunes **subword embeddings** directly.
-- Maintains FastText's strength in handling **out-of-vocabulary (OOV)** words.
+- Fine-tunes **word embeddings**.
+- Maintains FastText's strength in handling **out-of-vocabulary (OOV)** words as we can just keep subword embedding for OOVs.
 
 ---
 
@@ -85,19 +85,20 @@ pip install -r requirements.txt
 ### Preprocessing
 
 ```bash
-scripts\load_and_clean_data.bat
+./scripts/load_and_clean_data.sh
 ```
 
 ### Training All Models
 
 ```bash
-scripts\train_all_models.bat
+
+./scripts/train_all_models.sh
 ```
 
 ### Evaluate All Models
 
 ```bash
-scripts\evaluate_all_models.bat
+./scripts/evaluate_all_models.sh
 ```
 
 ---
@@ -132,7 +133,3 @@ MIT License © 2025 Yanis Merzouki
 - **Tingting Xu**  
   GitHub: [tingting-xu824](https://github.com/tingting-xu824)  
   Email: xuting@student.ethz.ch
-
-```
-
-```
